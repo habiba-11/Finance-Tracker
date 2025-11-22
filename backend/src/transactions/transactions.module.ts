@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Transaction, TransactionSchema } from './schemas/transaction.schema';
+import { TransactionsService } from './transactions.service';
+import { TransactionsController } from './transactions.controller';
+import {
+  Transaction,
+  TransactionSchema,
+} from './schemas/transaction.schema';
 
 @Module({
   imports: [
@@ -8,8 +13,8 @@ import { Transaction, TransactionSchema } from './schemas/transaction.schema';
       { name: Transaction.name, schema: TransactionSchema },
     ]),
   ],
-  providers: [],
-  controllers: [],
-  exports: [MongooseModule],
+  controllers: [TransactionsController],
+  providers: [TransactionsService],
+  exports: [TransactionsService],
 })
 export class TransactionsModule {}
