@@ -6,6 +6,7 @@ import {
   Transaction,
   TransactionDocument,
 } from '../transactions/schemas/transaction.schema';
+import { TransactionsService } from '../transactions/transactions.service';
 
 @Injectable()
 export class BudgetsService {
@@ -13,9 +14,12 @@ export class BudgetsService {
     @InjectModel(Budget.name)
     private budgetModel: Model<BudgetDocument>,
 
-    @InjectModel(Transaction.name)
-    private transactionModel: Model<TransactionDocument>,
+       private transactionsService: TransactionsService,
+        // Inject TransactionsService
   ) {}
+
+
+  
 
   async create(body: any) {
     const { userId, month, year, amount } = body;
