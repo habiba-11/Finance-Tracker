@@ -10,5 +10,9 @@ export class UsersController {
   register(@Body() body: any) {
     return this.usersService.register(body);
   }
+  @Post('login')
+  login(@Body() body: any) {
+    return this.usersService.login(body);
+  }
 }
 
