@@ -37,4 +37,26 @@ export class UsersService {
 
     return user.save();
   }
+  async login(body: any) {
+    const { email, password } = body;
+
+    if (!email || !password) {
+      throw new BadRequestException('Email and password are required');
+    }
+
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    const match = await bcrypt.compare(password, user.passwordHash);
+    if (!match) {
+      throw new BadRequestException('Invalid credentials');
+    }
+
+    return {
+      message: 'Login successful',
+      userId: user._id,
+    };
+  }
 }
