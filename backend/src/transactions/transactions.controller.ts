@@ -12,5 +12,8 @@ export class TransactionsController {
     return this.transactionsService.create(body);
   }
 
-  // getUserTransactions() will be added by Member 4
+  @Get(':userId')
+  getUserTransactions(@Param('userId') userId: string) {
+    return this.transactionsService.getUserTransactions(userId);
+  }
 }

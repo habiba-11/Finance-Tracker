@@ -38,5 +38,29 @@ export class TransactionsService {
     return transaction.save();
   }
 
-  // getUserTransactions() will be implemented by Member 4
+  async getUserTransactions(userId: string) {
+    const transactions = await this.transactionModel
+      .find({ userId })
+      .sort({ date: -1 });
+
+    // ✅ Imperative style (loop) – MS2 requirement
+    let totalIncome = 0;
+    let totalExpense = 0;
+
+    for (const t of transactions) {
+      if (t.type === 'income') totalIncome += t.amount;
+      else if (t.type === 'expense') totalExpense += t.amount;
+    }
+
+    const balance = totalIncome - totalExpense;
+
+    return {
+      transactions,
+      summary: {
+        totalIncome,
+        totalExpense,
+        balance,
+      },
+    };
+  }
 }
