@@ -10,5 +10,12 @@ export class BudgetsController {
     return this.budgetsService.create(body);
   }
 
-  // getBudget() will be added by Member 6
+ @Get(':userId/:month/:year')
+  getBudget(
+    @Param('userId') userId: string,
+    @Param('month') month: string,
+    @Param('year') year: string,
+  ) {
+    return this.budgetsService.getBudget(userId, +month, +year);
+  }
 }
