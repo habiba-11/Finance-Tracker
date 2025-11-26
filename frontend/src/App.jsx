@@ -1,27 +1,56 @@
 import React, { useState } from 'react';
 import Register from './components/Register';
 import Login from './components/Login';
+import AddTransaction from './components/AddTransaction';
 import './App.css';
 
 function App() {
-  const [isLogin, setIsLogin] = useState(true); // State to toggle between Register and Login
+  const [view, setView] = useState('login'); // 'login' | 'register' | 'app'
+  const [userId, setUserId] = useState(localStorage.getItem('userId') || '');
 
-  // Toggle between Register and Login
-  const toggleForm = () => {
-    setIsLogin(!isLogin);
+  const handleLogin = (id) => {
+    localStorage.setItem('userId', id);
+    setUserId(id);
+    setView('app');
   };
+
+  const handleLogout = () => {
+    localStorage.removeItem('userId');
+    setUserId('');
+    setView('login');
+  };
+
+  const handleRegistered = () => {
+    setView('login');
+  };
+
+  if (view === 'app' && userId) {
+    return (
+      <div className="App">
+        <h1>Finance Tracker</h1>
+        <button onClick={handleLogout}>Logout</button>
+        <AddTransaction userId={userId} />
+      </div>
+    );
+  }
 
   return (
     <div className="App">
       <h1>Welcome to the Finance Tracker</h1>
 
-      {/* Display either Login or Register based on state */}
-      {isLogin ? <Login /> : <Register />}
-      
-      {/* Button to toggle between Login and Register forms */}
-      <button onClick={toggleForm}>
-        {isLogin ? 'Need an account? Register here' : 'Already have an account? Login here'}
-      </button>
+      {view === 'login' && (
+        <>
+          <Login onLogin={handleLogin} />
+          <button onClick={() => setView('register')}>Need an account? Register here</button>
+        </>
+      )}
+
+      {view === 'register' && (
+        <>
+          <Register onRegistered={handleRegistered} />
+          <button onClick={() => setView('login')}>Already have an account? Login here</button>
+        </>
+      )}
     </div>
   );
 }

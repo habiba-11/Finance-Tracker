@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Login() {
+function Login({ onLogin }) {
   // State for form inputs and response message
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,7 +21,15 @@ function Login() {
     if (response.ok) {
       // Parse response if login is successful
       const data = await response.json();
-      setMessage(`Login successful! User ID: ${data.userId}`); // ✅ FIXED
+      setMessage('Login successful! Redirecting...');
+      // Store userId and notify parent
+      if (data.userId) {
+        try {
+          if (onLogin) onLogin(data.userId);
+        } catch (err) {
+          console.error('onLogin callback error', err);
+        }
+      }
     } else {
       // Handle errors from the server
       const data = await response.json();

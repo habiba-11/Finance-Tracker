@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-function Register() {
+function Register({ onRegistered }) {
   // State for form inputs
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -23,7 +23,8 @@ function Register() {
   console.log(response);
 
   if (response.ok) {
-    setMessage('Registration successful!');
+    setMessage('Registration successful! You can now login.');
+    if (onRegistered) onRegistered();
   } else {
     const data = await response.json();
     console.log('Error response:', data);
