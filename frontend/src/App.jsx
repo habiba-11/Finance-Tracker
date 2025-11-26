@@ -3,7 +3,7 @@ import Register from './components/Register';
 import Login from './components/Login';
 import AddTransaction from './components/AddTransaction';
 import GetTransaction from './components/GetTransaction';  // Singular name
- 
+import BudgetForm from './components/BudgetForm';
 
 import './App.css';
 
@@ -30,28 +30,39 @@ function App() {
     setView('transactions');
   };
 
-  if (view === 'app' && userId) {
-    return (
-      <div className="App">
-        <h1>Finance Tracker</h1>
-        <button onClick={handleLogout}>Logout</button>
-        <AddTransaction userId={userId} />
+ if (view === 'app' && userId) {
+  return (
+    <div className="App">
+      <h1>Finance Tracker</h1>
+      <button onClick={handleLogout}>Logout</button>
+
+      {/* Merged layout: AddTransaction and BudgetForm side by side */}
+      <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+        <div style={{ flex: 1 }}>
+          <AddTransaction userId={userId} />
+        </div>
+        <div style={{ flex: 1 }}>
+          <BudgetForm userId={userId} />
+        </div>
+      </div>
+
+      {/* Button for viewing transactions */}
       <button onClick={handleViewTransactions}>View Transactions</button>
-      </div>
-    );
-  }
+    </div>
+  );
+}
 
-  if (view === 'transactions' && userId) {
-    return (
-      <div className="App">
-        <h1>Your Transactions</h1>
-        <button onClick={() => setView('app')}>Back to Add Transaction</button>
+if (view === 'transactions' && userId) {
+  return (
+    <div className="App">
+      <h1>Your Transactions</h1>
+      <button onClick={() => setView('app')}>Back to Add Transaction</button>
 
-        {/* GetTransaction component to display user's transactions */}
-        <GetTransaction userId={userId} />
-      </div>
-    );
-  }
+      {/* GetTransaction component to display user's transactions */}
+      <GetTransaction userId={userId} />
+    </div>
+  );
+}
 
   return (
     <div className="App">
