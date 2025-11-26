@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Register from './components/Register';
 import Login from './components/Login';
 import AddTransaction from './components/AddTransaction';
+import BudgetForm from './components/BudgetForm';
 import './App.css';
 
 function App() {
@@ -29,7 +30,14 @@ function App() {
       <div className="App">
         <h1>Finance Tracker</h1>
         <button onClick={handleLogout}>Logout</button>
-        <AddTransaction userId={userId} />
+        <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
+          <div style={{ flex: 1 }}>
+            <AddTransaction userId={userId} />
+          </div>
+          <div style={{ flex: 1 }}>
+            <BudgetForm userId={userId} />
+          </div>
+        </div>
       </div>
     );
   }
