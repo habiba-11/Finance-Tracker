@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import Register from './components/Register';
 import Login from './components/Login';
 import AddTransaction from './components/AddTransaction';
+import GetTransaction from './components/GetTransaction';  // Singular name
+ 
+
 import './App.css';
 
 function App() {
@@ -23,6 +26,9 @@ function App() {
   const handleRegistered = () => {
     setView('login');
   };
+  const handleViewTransactions = () => {
+    setView('transactions');
+  };
 
   if (view === 'app' && userId) {
     return (
@@ -30,6 +36,19 @@ function App() {
         <h1>Finance Tracker</h1>
         <button onClick={handleLogout}>Logout</button>
         <AddTransaction userId={userId} />
+      <button onClick={handleViewTransactions}>View Transactions</button>
+      </div>
+    );
+  }
+
+  if (view === 'transactions' && userId) {
+    return (
+      <div className="App">
+        <h1>Your Transactions</h1>
+        <button onClick={() => setView('app')}>Back to Add Transaction</button>
+
+        {/* GetTransaction component to display user's transactions */}
+        <GetTransaction userId={userId} />
       </div>
     );
   }
