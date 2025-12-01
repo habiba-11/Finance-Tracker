@@ -1,21 +1,28 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, BadRequestException } from '@nestjs/common';
 import { BudgetsService } from './budgets.service';
 
 @Controller('budgets')
 export class BudgetsController {
   constructor(private readonly budgetsService: BudgetsService) {}
-
   @Post()
-  create(@Body() body: any) {
-    return this.budgetsService.create(body);
+  async create(@Body() body: any) {
+    try {
+      return await this.budgetsService.create(body);
+    } catch (error) {
+      throw new BadRequestException(error.message);  // Propagate error message to the client
+    }
   }
 
- @Get(':userId/:month/:year')
-  getBudget(
+  @Get(':userId/:month/:year')
+  async getBudget(
     @Param('userId') userId: string,
     @Param('month') month: string,
     @Param('year') year: string,
   ) {
-    return this.budgetsService.getBudget(userId, +month, +year);
-  }
+    try {
+      return await this.budgetsService.getBudget(userId, +month, +year);
+    } catch (error) {
+      throw new BadRequestException(error.message);  // Propagate error message to the client
+    }
+  }
 }
