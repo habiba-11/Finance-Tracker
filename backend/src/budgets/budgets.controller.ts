@@ -25,4 +25,13 @@ export class BudgetsController {
       throw new BadRequestException(error.message);  // Propagate error message to the client
     }
   }
+
+  @Get('all/:userId')
+  async getAllBudgets(@Param('userId') userId: string) {
+    try {
+      return await this.budgetsService.getAllBudgets(userId);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
+  }
 }

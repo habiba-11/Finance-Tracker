@@ -19,115 +19,139 @@ export class TransactionsService {
   async create(body: any) {
     const { userId, amount, type, category, date, description } = body;
 
-    // ✅ Declarative validation for missing fields
-    const required = ['userId', 'amount', 'type', 'category', 'date'];
-    const missing = required.filter((f) => !body[f]);
-    if (missing.length) {
-      throw new BadRequestException(`Missing fields: ${missing.join(', ')}`);
+    // Validate required fields
+    if (!userId || !amount || !type || !category || !date) {
+      throw new BadRequestException('userId, amount, type, category, and date are required');
     }
 
-    // ✅ Imperative validation for edge cases
-    // 1. Invalid amount (negative value)
+    // Validate amount
     if (amount <= 0) {
       throw new BadRequestException('Amount must be a positive value');
     }
 
-    // 2. Invalid type (not "income" or "expense")
-    const validTypes = ['income', 'expense'];
-    if (!validTypes.includes(type)) {
+    // Validate type
+    if (type !== 'income' && type !== 'expense') {
       throw new BadRequestException('Type must be either "income" or "expense"');
     }
 
-    // 3. Invalid date format (checking for a valid Date object)
-    const isValidDate = !isNaN(new Date(date).getTime());
-    if (!isValidDate) {
+    // Validate and normalize date to match budget query format
+    let transactionDate: Date;
+    
+    if (typeof date === 'string') {
+      // Extract date parts from YYYY-MM-DD format
+      let dateOnly = date;
+      if (date.includes('T')) {
+        dateOnly = date.split('T')[0];
+      }
+      
+      const parts = dateOnly.split('-');
+      if (parts.length === 3) {
+        const year = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10);
+        const day = parseInt(parts[2], 10);
+        
+        // Create date in LOCAL timezone at midnight (matches budget query format)
+        transactionDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      } else {
+        transactionDate = new Date(date);
+      }
+    } else {
+      transactionDate = new Date(date);
+      transactionDate.setHours(0, 0, 0, 0);
+    }
+    
+    if (isNaN(transactionDate.getTime())) {
       throw new BadRequestException('Invalid date format');
     }
 
-    // 4. Check for valid userId (must be a valid MongoDB ObjectId)
-if (!userId || !Types.ObjectId.isValid(userId)) {
-  throw new BadRequestException('Invalid or missing userId');
-}
+    // Validate userId
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid userId');
+    }
 
     const transaction = new this.transactionModel({
       userId: new Types.ObjectId(userId),
       amount,
       type,
       category,
-      date,
+      date: transactionDate,
       description,
     });
 
-    // ✅ FR2: Add transaction to the database
     try {
-      return await transaction.save();
+      const savedTransaction = await transaction.save();
+      console.log('Transaction saved:', savedTransaction._id, 'for user:', userId);
+      return savedTransaction;
     } catch (error) {
-      throw new InternalServerErrorException('Error saving transaction');
+      console.error('Error saving transaction:', error);
+      throw new InternalServerErrorException(`Error saving transaction: ${error.message}`);
     }
   }
 
   // Method to get user transactions
-
-async getUserTransactions(userId: string) {
-  // 1. Validate the userId (must be a valid MongoDB ObjectId)
-  if (!userId || !Types.ObjectId.isValid(userId)) {
-    throw new BadRequestException('Invalid or missing userId');
-  }
-
-  try {
-    // 2. Check if the user exists in the database
-    const userExists = await this.userModel.findById(userId);
-    if (!userExists) {
-      throw new BadRequestException('User not found');
+  async getUserTransactions(userId: string) {
+    if (!userId || !Types.ObjectId.isValid(userId)) {
+      throw new BadRequestException('Invalid or missing userId');
     }
 
-    // 3. Retrieve transactions for the user
-    const transactions = await this.transactionModel
-      .find({ userId })
-      .sort({ date: -1 }); // Sorting by most recent first
-
-    // 4. If no transactions exist, return an empty list with a message
-    if (transactions.length === 0) {
-      return {
-        transactions: [],
-        summary: {
-          totalIncome: 0,
-          totalExpense: 0,
-          balance: 0,
-        },
-        message: 'No transactions found for this user', // Added message for clarity
-      };
-    }
-
-    // 5. Imperative style (loop) for calculating totals
-    let totalIncome = 0;
-    let totalExpense = 0;
-
-    // 6. Loop through transactions and calculate totals
-    for (const t of transactions) {
-      if (t.type === 'income') {
-        totalIncome += t.amount;
-      } else if (t.type === 'expense') {
-        totalExpense += t.amount;
+    try {
+      const userExists = await this.userModel.findById(userId);
+      if (!userExists) {
+        throw new BadRequestException('User not found');
       }
-    }
 
-    // 7. Calculate the balance
-    const balance = totalIncome - totalExpense;
+      // Query with ObjectId to ensure proper matching
+      const userIdObjectId = new Types.ObjectId(userId);
+      console.log('Fetching transactions for userId:', userId, 'as ObjectId:', userIdObjectId);
+      
+      const transactions = await this.transactionModel
+        .find({ userId: userIdObjectId })
+        .sort({ date: -1 });
 
-    // 8. Return the transactions and summary
-    return {
-      transactions,
-      summary: {
+      console.log(`Found ${transactions.length} transactions for user ${userId}`);
+
+      if (transactions.length === 0) {
+        return {
+          transactions: [],
+          summary: {
+            totalIncome: 0,
+            totalExpense: 0,
+            balance: 0,
+          },
+        };
+      }
+
+      let totalIncome = 0;
+      let totalExpense = 0;
+
+      for (const t of transactions) {
+        if (t.type === 'income') {
+          totalIncome += t.amount;
+        } else if (t.type === 'expense') {
+          totalExpense += t.amount;
+        }
+      }
+
+      const balance = totalIncome - totalExpense;
+
+      console.log('Returning transactions:', {
+        count: transactions.length,
         totalIncome,
         totalExpense,
-        balance,
-      },
-    };
-  } catch (error) {
-    // 9. Handle database or other server errors
-    throw new InternalServerErrorException('Error retrieving transactions');
-  }
-}
+        balance
+      });
 
+      return {
+        transactions,
+        summary: {
+          totalIncome,
+          totalExpense,
+          balance,
+        },
+      };
+    } catch (error) {
+      console.error('Error retrieving transactions:', error);
+      throw new InternalServerErrorException('Error retrieving transactions');
+    }
+  }
 }
