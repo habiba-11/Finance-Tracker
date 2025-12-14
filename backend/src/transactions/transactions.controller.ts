@@ -11,14 +11,21 @@ export class TransactionsController {
   @Post()
   async create(@Body() body: any) {
     try {
-      return await this.transactionsService.create(body);
+      console.log('Creating transaction with data:', body);
+      const result = await this.transactionsService.create(body);
+      console.log('Transaction created successfully:', result._id);
+      return result;
     } catch (error) {
+      console.error('Error creating transaction:', error);
       // Handling specific errors from the service
       if (error instanceof BadRequestException) {
         throw new BadRequestException(error.message);
       }
+      if (error instanceof InternalServerErrorException) {
+        throw new InternalServerErrorException(error.message);
+      }
       // Internal error for unknown failures
-      throw new BadRequestException('Failed to create transaction');
+      throw new BadRequestException(error.message || 'Failed to create transaction');
     }
   }
 

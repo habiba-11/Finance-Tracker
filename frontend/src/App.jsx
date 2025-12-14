@@ -1,87 +1,89 @@
-import React, { useState } from 'react';
-import Register from './components/Register';
-import Login from './components/Login';
-import AddTransaction from './components/AddTransaction';
-import GetTransaction from './components/GetTransaction';  // Singular name
-import BudgetForm from './components/BudgetForm';
-
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import ToastContainer from './components/ToastContainer';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import SetBudget from './pages/SetBudget';
+import BudgetView from './pages/BudgetView';
+import AddTransaction from './pages/AddTransaction';
+import Transactions from './pages/Transactions';
+import PreviousBudgets from './pages/PreviousBudgets';
+import Profile from './pages/Profile';
 import './App.css';
 
+// Protected Route Component
+function ProtectedRoute({ children }) {
+  const userId = localStorage.getItem('userId');
+  return userId ? children : <Navigate to="/login" replace />;
+}
+
 function App() {
-  const [view, setView] = useState('login'); // 'login' | 'register' | 'app'
-  const [userId, setUserId] = useState(localStorage.getItem('userId') || '');
-
-  const handleLogin = (id) => {
-    localStorage.setItem('userId', id);
-    setUserId(id);
-    setView('app');
-  };
-
-  const handleLogout = () => {
-    localStorage.removeItem('userId');
-    setUserId('');
-    setView('login');
-  };
-
-  const handleRegistered = () => {
-    setView('login');
-  };
-  const handleViewTransactions = () => {
-    setView('transactions');
-  };
-
- if (view === 'app' && userId) {
   return (
-    <div className="App">
-      <h1>Finance Tracker</h1>
-      <button onClick={handleLogout}>Logout</button>
-
-      {/* Merged layout: AddTransaction and BudgetForm side by side */}
-      <div style={{ display: 'flex', gap: '20px', marginTop: '20px' }}>
-        <div style={{ flex: 1 }}>
-          <AddTransaction userId={userId} />
-        </div>
-        <div style={{ flex: 1 }}>
-          <BudgetForm userId={userId} />
-        </div>
-      </div>
-
-      {/* Button for viewing transactions */}
-      <button onClick={handleViewTransactions}>View Transactions</button>
-    </div>
-  );
-}
-
-if (view === 'transactions' && userId) {
-  return (
-    <div className="App">
-      <h1>Your Transactions</h1>
-      <button onClick={() => setView('app')}>Back to Add Transaction</button>
-
-      {/* GetTransaction component to display user's transactions */}
-      <GetTransaction userId={userId} />
-    </div>
-  );
-}
-
-  return (
-    <div className="App">
-      <h1>Welcome to the Finance Tracker</h1>
-
-      {view === 'login' && (
-        <>
-          <Login onLogin={handleLogin} />
-          <button onClick={() => setView('register')}>Need an account? Register here</button>
-        </>
-      )}
-
-      {view === 'register' && (
-        <>
-          <Register onRegistered={handleRegistered} />
-          <button onClick={() => setView('login')}>Already have an account? Login here</button>
-        </>
-      )}
-    </div>
+    <BrowserRouter>
+      <ToastContainer />
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/set-budget"
+          element={
+            <ProtectedRoute>
+              <SetBudget />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/budget"
+          element={
+            <ProtectedRoute>
+              <BudgetView />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/add-transaction"
+          element={
+            <ProtectedRoute>
+              <AddTransaction />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/transactions"
+          element={
+            <ProtectedRoute>
+              <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/previous-budgets"
+          element={
+            <ProtectedRoute>
+              <PreviousBudgets />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

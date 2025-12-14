@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Budget } from './schemas/budget.schema';  
 import { Transaction } from 'src/transactions/schemas/transaction.schema'; 
 import { User } from 'src/users/schemas/user.schema';
@@ -17,12 +17,10 @@ export class BudgetsService {
   async create(body: any) {
     const { userId, month, year, amount } = body;
 
-    // ✅ Validations for missing fields and invalid values
     if (!userId || !month || !year || amount == null) {
       throw new BadRequestException('userId, month, year, amount are required');
     }
 
-    // Validate if the userId exists in the User collection
     const userExists = await this.userModel.findById(userId);
     if (!userExists) {
       throw new BadRequestException('Invalid userId');
@@ -40,9 +38,8 @@ export class BudgetsService {
       throw new BadRequestException('Amount cannot be negative');
     }
 
-    // ✅ Current Date Validation: Prevent budgets for past months
     const currentDate = new Date();
-    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-11, so we add 1
+    const currentMonth = currentDate.getMonth() + 1;
     const currentYear = currentDate.getFullYear();
 
     if (year < currentYear || (year === currentYear && month < currentMonth)) {
@@ -61,18 +58,15 @@ export class BudgetsService {
       amount,
     });
 
-    // ✅ FR4: Set budget
     return budget.save();
   }
 
   // Method to get the budget details for a user, month, and year
   async getBudget(userId: string, month: number, year: number) {
-    // Validate input
     if (!userId || !month || !year) {
       throw new BadRequestException('userId, month, and year are required');
     }
 
-    // Validate if the userId exists in the User collection
     const userExists = await this.userModel.findById(userId);
     if (!userExists) {
       throw new BadRequestException('Invalid userId');
@@ -88,25 +82,28 @@ export class BudgetsService {
 
     const budget = await this.budgetModel.findOne({ userId, month, year });
 
-    // If no budget is set for this month, return a message
     if (!budget) {
       return { message: 'No budget set for this month' };
     }
 
     // Date range for the given month and year
     const start = new Date(year, month - 1, 1);
+    start.setHours(0, 0, 0, 0);
+    
     const end = new Date(year, month, 0);
+    end.setHours(23, 59, 59, 999);
 
-    // Find all expenses within this month
+    // Find all expenses within this month - use ObjectId for userId matching
+    const userIdObjectId = new Types.ObjectId(userId);
     const expenses = await this.transactionModel.find({
-      userId,
+      userId: userIdObjectId,
       type: 'expense',
       date: { $gte: start, $lte: end },
     });
+    
+    console.log(`Found ${expenses.length} expenses for budget month ${month}/${year}`);
 
-    // ✅ Declarative style – reduce (MS2 requirement)
     const totalSpent = expenses.reduce((sum, t) => sum + t.amount, 0);
-
     const remaining = budget.amount - totalSpent;
     const percentage = budget.amount > 0
       ? (totalSpent / budget.amount) * 100
@@ -118,5 +115,50 @@ export class BudgetsService {
       remaining,
       percentage: Number(percentage.toFixed(2)),
     };
+  }
+
+  // Method to get all budgets for a user
+  async getAllBudgets(userId: string) {
+    if (!userId) {
+      throw new BadRequestException('userId is required');
+    }
+
+    const userExists = await this.userModel.findById(userId);
+    if (!userExists) {
+      throw new BadRequestException('Invalid userId');
+    }
+
+    const budgets = await this.budgetModel.find({ userId }).sort({ year: -1, month: -1 });
+
+    const budgetsWithSpending = await Promise.all(
+      budgets.map(async (budget) => {
+        const start = new Date(budget.year, budget.month - 1, 1);
+        start.setHours(0, 0, 0, 0);
+        const end = new Date(budget.year, budget.month, 0);
+        end.setHours(23, 59, 59, 999);
+
+        const userIdObjectId = new Types.ObjectId(userId);
+        const expenses = await this.transactionModel.find({
+          userId: userIdObjectId,
+          type: 'expense',
+          date: { $gte: start, $lte: end },
+        });
+
+        const totalSpent = expenses.reduce((sum, t) => sum + t.amount, 0);
+        const remaining = budget.amount - totalSpent;
+        const percentage = budget.amount > 0
+          ? (totalSpent / budget.amount) * 100
+          : 0;
+
+        return {
+          budget,
+          totalSpent,
+          remaining,
+          percentage: Number(percentage.toFixed(2)),
+        };
+      })
+    );
+
+    return { budgets: budgetsWithSpending };
   }
 }

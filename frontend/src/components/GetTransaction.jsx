@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatDateDDMMYYYY } from '../utils/dateUtils';
 
 const GetTransaction = () => {
   const [transactions, setTransactions] = useState([]);
@@ -50,7 +51,7 @@ const GetTransaction = () => {
               <p><strong>Amount:</strong> {transaction.amount}</p>
               <p><strong>Type:</strong> {transaction.type}</p>
               <p><strong>Category:</strong> {transaction.category}</p>
-              <p><strong>Date:</strong> {new Date(transaction.date).toLocaleDateString()}</p>
+              <p><strong>Date:</strong> {formatDateDDMMYYYY(transaction.date)}</p>
               <p><strong>Description:</strong> {transaction.description || 'N/A'}</p>
             </li>
           ))}
