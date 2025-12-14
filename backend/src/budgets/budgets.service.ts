@@ -94,7 +94,7 @@ export class BudgetsService {
     end.setHours(23, 59, 59, 999);
 
     // Find all expenses within this month - use ObjectId for userId matching
-    const userIdObjectId = userId instanceof Types.ObjectId ? userId : new Types.ObjectId(userId);
+    const userIdObjectId = new Types.ObjectId(userId);
     const expenses = await this.transactionModel.find({
       userId: userIdObjectId,
       type: 'expense',
