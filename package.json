@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@nestjs/mongoose": "^11.0.3",
+    "bcryptjs": "^3.0.3",
+    "mongoose": "^8.20.1"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6"
+  }
+}

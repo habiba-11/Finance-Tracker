@@ -1,23 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import request from 'supertest';
-import { App } from 'supertest/types';
-import { AppModule } from './../src/app.module';
+import { createTestApp, stopMongoMemoryServer, getRequestAgent } from './test-setup';
+import * as request from 'supertest';
 
 describe('AppController (e2e)', () => {
-  let app: INestApplication<App>;
+  let app: INestApplication;
+  let httpAgent: request.SuperTest<request.Test>;
 
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile();
+  beforeAll(async () => {
+    app = await createTestApp();
+    httpAgent = getRequestAgent(app);
+  });
 
-    app = moduleFixture.createNestApplication();
-    await app.init();
+  afterAll(async () => {
+    await app.close();
+    await stopMongoMemoryServer();
   });
 
   it('/ (GET)', () => {
-    return request(app.getHttpServer())
+    return httpAgent
       .get('/')
       .expect(200)
       .expect('Hello World!');
