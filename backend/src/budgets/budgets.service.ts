@@ -48,7 +48,7 @@ interface IBudgetRepository {
 
 // Mongoose implementation of Budget Repository
 class BudgetRepository implements IBudgetRepository {
-  constructor(private readonly budgetModel: Model<Budget>) {}
+  constructor(private readonly budgetModel: Model<BudgetDocument>) {}
 
   async create(budgetData: any): Promise<BudgetDocument> {
     const budget = new this.budgetModel(budgetData);
