@@ -74,7 +74,7 @@ interface ITransactionRepository {
 
 // Mongoose implementation of Transaction Repository
 class TransactionRepository implements ITransactionRepository {
-  constructor(private readonly transactionModel: Model<Transaction>) {}
+  constructor(private readonly transactionModel: Model<TransactionDocument>) {}
 
   async create(transactionData: any): Promise<TransactionDocument> {
     const transaction = new this.transactionModel(transactionData);

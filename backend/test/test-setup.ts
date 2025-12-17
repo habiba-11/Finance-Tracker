@@ -144,9 +144,9 @@ export async function clearDatabase(app: INestApplication): Promise<void> {
  * Get Supertest request agent for testing HTTP endpoints
  * 
  * @param {INestApplication} app - The NestJS application instance
- * @returns {request.SuperTest<request.Test>} Supertest agent for making HTTP requests
+ * @returns {ReturnType<typeof request>} Supertest agent for making HTTP requests
  */
-export function getRequestAgent(app: INestApplication): request.SuperTest<request.Test> {
+export function getRequestAgent(app: INestApplication): ReturnType<typeof request> {
   return request(app.getHttpServer());
 }
 
