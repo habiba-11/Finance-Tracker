@@ -1,16 +1,102 @@
-# React + Vite
+# Finance Tracker - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend application for the Finance Tracker project.
 
-Currently, two official plugins are available:
+## Getting Started
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Prerequisites
+- Node.js (v18 or higher)
+- npm or yarn
 
-## React Compiler
+### Installation
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+npm install
+```
 
-## Expanding the ESLint configuration
+### Development
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+```bash
+npm run dev
+```
+
+The application will start on `http://localhost:5173`
+
+### Build
+
+```bash
+npm run build
+```
+
+### Preview Production Build
+
+```bash
+npm run preview
+```
+
+## Testing
+
+### Unit Tests (Jest)
+
+Run unit tests using Jest:
+
+```bash
+npm test                 # Run tests once
+npm run test:watch      # Run tests in watch mode
+npm run test:coverage   # Run tests with coverage report
+npm run test:ci         # Run tests in CI mode (with coverage, no watch)
+```
+
+**Test Structure:**
+- Unit tests are located in `test/unit/` directory
+- Tests are organized to mirror the `src/` directory structure
+- Component tests: `test/unit/components/`
+- Service tests: `test/unit/services/`
+- Utility tests: `test/unit/utils/`
+
+### End-to-End Tests (Cypress)
+
+Run E2E tests using Cypress:
+
+```bash
+npm run test:e2e        # Run tests headlessly
+npm run test:e2e:open   # Open Cypress Test Runner (interactive)
+```
+
+**Note**: Make sure both frontend and backend servers are running before running E2E tests:
+1. Start backend: `cd backend && npm run start:dev`
+2. Start frontend: `npm run dev`
+3. Run Cypress tests: `npm run test:e2e`
+
+**E2E Test Structure:**
+- E2E tests are located in `cypress/e2e/` directory
+- Test files: `auth.cy.js`, `transactions.cy.js`, `budgets.cy.js`, `user-journey.cy.js`
+- Support files: `cypress/support/` (commands, configuration)
+
+## Project Structure
+
+```
+frontend/
+├── src/                    # Source code
+│   ├── components/         # React components
+│   ├── pages/              # Page components
+│   ├── services/           # API and service layer
+│   ├── utils/              # Utility functions
+│   └── styles/             # CSS styles
+├── test/                   # Unit tests
+│   ├── unit/               # Unit test files
+│   └── setup/              # Test setup files
+├── cypress/                # E2E tests
+│   ├── e2e/                # E2E test files
+│   └── support/            # Cypress support files
+└── public/                 # Static assets
+```
+
+## Technologies
+
+- React 19
+- Vite
+- React Router DOM
+- Jest (Unit Testing)
+- React Testing Library
+- Cypress (E2E Testing)
